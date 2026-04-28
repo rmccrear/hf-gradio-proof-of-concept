@@ -52,21 +52,12 @@ pip install -r requirements.txt
 python -m backend.app
 ```
 
-The app exposes the named Gradio API endpoint `/ask_model`.
-
-The key idea is that Gradio exposes a regular Python function:
+Gradio exposes the regular Python function `answer_question(prompt)` as both a web UI and a named API endpoint, `/ask_model`:
 
 ```python
 from backend.hf_inference import answer_question
 
 demo = gr.Interface(fn=answer_question, ...)
-```
-
-Running the app with `-m backend.app` keeps imports simple because Python treats `backend` as a package.
-That means `backend/app.py` can use one normal import, with no direct-file fallback:
-
-```python
-from backend.hf_inference import answer_question
 ```
 
 ## Run The Same Function From The CLI
@@ -75,7 +66,7 @@ from backend.hf_inference import answer_question
 python backend/hf_inference.py
 ```
 
-That file has an `if __name__ == "__main__":` block, so it can be imported by Gradio or run directly as a script.
+The same file that defines `answer_question(prompt)` also has an `if __name__ == "__main__":` block, so you can run it directly from the command line.
 
 ## Webapp
 
