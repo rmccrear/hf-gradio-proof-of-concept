@@ -40,28 +40,13 @@ export HF_TOKEN=hf_your_token_here
 
 ## Local Setup
 
-With a local virtual environment:
+Create and activate any Python environment you like, then install the dependencies:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-```
-
-With Conda:
-
-```bash
-conda create -n spaces-tutorial python=3.11
-conda activate spaces-tutorial
 pip install -r requirements.txt
 ```
 
 ## Run The Backend
-
-```bash
-.venv/bin/python -m backend.app
-```
-
-From an active Conda environment:
 
 ```bash
 python -m backend.app
@@ -85,12 +70,6 @@ from backend.hf_inference import answer_question
 ```
 
 ## Run The Same Function From The CLI
-
-```bash
-.venv/bin/python backend/hf_inference.py
-```
-
-From an active Conda environment:
 
 ```bash
 python backend/hf_inference.py
