@@ -9,139 +9,111 @@ app_file: backend/app.py
 pinned: false
 ---
 
-# Gradio + Hugging Face Spaces Tutorial Monorepo
+# Gradio + Hugging Face Router Proof Of Concept
 
-This repo is a small frontend/backend playground for learning:
+This repo contains a minimal end-to-end demo:
 
-- Gradio app authoring for Hugging Face Spaces
-- the Gradio JavaScript client: https://www.gradio.app/docs/js-client
-- the Gradio Python client: https://www.gradio.app/docs/python-client/introduction
-- the Gradio Interface API: https://www.gradio.app/docs/gradio/interface
+- a Gradio backend Space route at `/ask_model`
+- a plain HTML webapp that calls that route with `@gradio/client`
+- a command-line Python script that calls the same `answer_question(prompt)` function
 
 ## Repo Layout
 
 ```text
 .
-├── backend/              # Gradio Space app
-│   ├── app.py
-│   ├── hf_inference.py
-│   ├── interface_app.py
-│   └── requirements.txt
-├── frontend/             # Vite + TypeScript app using @gradio/client
-│   ├── package.json
-│   └── src/
-├── scripts/              # Small client examples and utilities
-│   └── python_client_demo.py
-└── AGENTS.md             # Contributor and Codex guidance
+├── backend/
+│   ├── __init__.py        # Makes backend importable as a Python package
+│   ├── app.py             # Gradio Space app exposing /ask_model
+│   └── hf_inference.py    # Defines answer_question(prompt)
+├── index.html             # Plain HTML webapp for GitHub Pages
+├── requirements.txt       # Space and local Python dependencies
+└── README.md
 ```
 
-## Backend
+## Environment
 
-Create a local virtual environment and install the backend dependencies:
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r backend/requirements.txt
-```
-
-If you prefer Conda:
-
-```bash
-conda create -n spaces-tutorial python=3.11
-conda activate spaces-tutorial
-pip install -r backend/requirements.txt
-```
-
-Run the local Gradio server:
-
-```bash
-.venv/bin/python backend/app.py
-```
-
-Or, from an active Conda environment:
-
-```bash
-python backend/app.py
-```
-
-By default, Gradio serves at http://127.0.0.1:7860.
-
-To run the smaller `gr.Interface` tutorial app instead:
-
-```bash
-.venv/bin/python backend/interface_app.py
-```
-
-From an active Conda environment:
-
-```bash
-python backend/interface_app.py
-```
-
-## Python Client Tutorial
-
-With the backend running:
-
-```bash
-.venv/bin/python scripts/python_client_demo.py
-```
-
-From an active Conda environment, use `python scripts/python_client_demo.py`.
-
-The script connects to `http://127.0.0.1:7860`, prints the API info, and calls the named `/greet` endpoint.
-
-## Hugging Face Inference
-
-This repo includes a small helper that calls Hugging Face Inference Providers through the OpenAI-compatible router with `meta-llama/Llama-3.1-8B-Instruct:novita` by default.
-
-`HuggingFaceTB/SmolLM2-135M-Instruct` is a great tiny tutorial model, but it is not currently deployed by Hugging Face Inference Providers. Use it locally with Transformers or deploy it yourself before calling it through an inference endpoint.
-
-Set your token first:
+Set a Hugging Face token before calling the model:
 
 ```bash
 export HF_TOKEN=hf_your_token_here
 ```
 
-Optional model/provider override:
+## Local Setup
+
+With a local virtual environment:
 
 ```bash
-export HF_MODEL=meta-llama/Llama-3.1-8B-Instruct:novita
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
 
-Or keep the provider separate:
+With Conda:
 
 ```bash
-export HF_MODEL=meta-llama/Llama-3.1-8B-Instruct
-export HF_PROVIDER=novita
+conda create -n spaces-tutorial python=3.11
+conda activate spaces-tutorial
+pip install -r requirements.txt
 ```
 
-Run the direct Python demo:
+## Run The Backend
 
 ```bash
-.venv/bin/python scripts/hf_inference_demo.py
+.venv/bin/python -m backend.app
 ```
 
-From an active Conda environment, use `python scripts/hf_inference_demo.py`.
-
-The main Gradio app also exposes this as the named `/hf_inference` endpoint in the "HF Inference" tab.
-
-## JavaScript Client Tutorial
-
-Install frontend dependencies:
+From an active Conda environment:
 
 ```bash
-cd frontend
-npm install
+python -m backend.app
 ```
 
-Run the frontend:
+The app exposes the named Gradio API endpoint `/ask_model`.
+
+The key idea is that Gradio exposes a regular Python function:
+
+```python
+from backend.hf_inference import answer_question
+
+demo = gr.Interface(fn=answer_question, ...)
+```
+
+Running the app with `-m backend.app` keeps imports simple because Python treats `backend` as a package.
+
+## Run The Same Function From The CLI
 
 ```bash
-npm run dev
+.venv/bin/python backend/hf_inference.py
 ```
 
-The frontend reads `VITE_GRADIO_APP_URL` and defaults to `http://127.0.0.1:7860`.
+From an active Conda environment:
 
-## Deploying To Hugging Face Spaces
+```bash
+python backend/hf_inference.py
+```
 
-The README front matter points Spaces at `backend/app.py`, so the Blocks-based Gradio backend is the deployable Space app. `backend/interface_app.py` is a focused companion for the Interface tutorial. The frontend is intentionally separate for local experiments with the JS client.
+That file has an `if __name__ == "__main__":` block, so it can be imported by Gradio or run directly as a script.
+
+## Webapp
+
+Open `index.html` directly or serve it with GitHub Pages. It imports the Gradio JavaScript client from jsDelivr:
+
+```js
+import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+```
+
+The webapp calls:
+
+```js
+client.predict("/ask_model", { prompt });
+```
+
+## Deployment Notes
+
+Hugging Face Spaces reads the README front matter above. The important settings are:
+
+```yaml
+sdk: gradio
+app_file: backend/app.py
+```
+
+Set `HF_TOKEN` as a Space secret before using the deployed app.
