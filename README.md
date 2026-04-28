@@ -78,6 +78,11 @@ demo = gr.Interface(fn=answer_question, ...)
 ```
 
 Running the app with `-m backend.app` keeps imports simple because Python treats `backend` as a package.
+That means `backend/app.py` can use one normal import, with no direct-file fallback:
+
+```python
+from backend.hf_inference import answer_question
+```
 
 ## Run The Same Function From The CLI
 

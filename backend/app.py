@@ -1,9 +1,6 @@
 import gradio as gr
 
-try:
-    from backend.hf_inference import answer_question
-except ImportError:
-    from hf_inference import answer_question
+from backend.hf_inference import answer_question
 
 
 demo = gr.Interface(
