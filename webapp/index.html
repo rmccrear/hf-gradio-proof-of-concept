@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gradio Client Proof of Life</title>
+  </head>
+  <body>
+    <h1>Gradio Client Proof of Life</h1>
+    <p>Click the button, then check the result below or the browser console.</p>
+    <label for="prompt-input">Prompt</label>
+    <textarea id="prompt-input" rows="4">
+Explain Gradio Interface in one sentence.</textarea
+    >
+    <button id="run-button" type="button">Call Gradio endpoint</button>
+    <pre id="result">Ready.</pre>
+
+    <script type="module">
+      import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+      const spaceUrl = "https://robertmcc-demo123.hf.space/";
+      const promptInput = document.querySelector("#prompt-input");
+      const button = document.querySelector("#run-button");
+      const resultBox = document.querySelector("#result");
+
+      button.addEventListener("click", async () => {
+        const prompt = promptInput.value.trim();
+        resultBox.textContent = "Calling Gradio endpoint...";
+
+        try {
+          console.log("Connecting to", spaceUrl);
+
+          const client = await Client.connect(spaceUrl);
+          const result = await client.predict("/ask_model", { prompt });
+
+          console.log("Prompt:", prompt);
+          console.log("Response:", result);
+
+          resultBox.textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          console.error(error);
+          resultBox.textContent =
+            error instanceof Error ? error.message : String(error);
+        }
+      });
+    </script>
+  </body>
+</html>
